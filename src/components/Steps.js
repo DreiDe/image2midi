@@ -8,6 +8,9 @@ const Steps = () => {
     const [currentStep, setCurrentStep] = useState(2);
     const [imagePath, setImagePath] = useState();
     const [locked, setLocked] = useState(true);
+    const [tileCount, setTileCount] = useState(4);
+    const [pause, setPause] = useState(true);
+    const [imageObject, setImageObject] = useState();
 
     const imageChange = (e) => {
         const [file] = e.target.files;
@@ -24,52 +27,53 @@ const Steps = () => {
         ctx.fillText("Noch kein 🖼️ gewählt", canvas.width / 2, canvas.height / 2);
     }
 
-    const rasterImage = () => {
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext('2d')
-        const rasterSize = canvas.width / 4;
+    const changeRasterSize = e => {
+        setTileCount(e.target.value);
 
-        console.log(rasterSize);
-        console.log(canvas.width);
+        const tilesPerRow = e.target.value;
+        const aspectRatio = imageObject.height / imageObject.width;
+        const totalTiles = tilesPerRow * Math.round(tilesPerRow * aspectRatio);
+        const pxPerTile = Math.round(imageObject.width / tilesPerRow);
+        const data = imageObject.data;
 
-        for (let h = 0; h < canvas.width; h += rasterSize) {
-            for (let v = 0; v < canvas.height; v += rasterSize) {
-                let color = { r: 0, g: 0, b: 0 };
-                for (let x = h; x < h + rasterSize; x++) {
-                    for (let y = v; y < v + rasterSize; y++) {
-                        let pixel = ctx.getImageData(x, y, 1, 1);
-                        let data = pixel.data;
-                        color.r += data[0];
-                        color.g += data[1];
-                        color.b += data[2];
-                    }
-                }
+        let currentTile = 0;
+        let colors = [...Array(totalTiles)].map(e => Array(3).fill(0));
 
-                color.r /= rasterSize * rasterSize;
-                color.g /= rasterSize * rasterSize;
-                color.b /= rasterSize * rasterSize;
-
-                ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
-                ctx.fillRect(h, v, rasterSize, rasterSize);
-            }
+        for (let px = 0; px < data.length / 4; px++) {
+            let rgba = px * 4;
+            colors[currentTile][0] += data[rgba];
+            colors[currentTile][1] += data[rgba + 1];
+            colors[currentTile][2] += data[rgba + 2];
+            if (px % pxPerTile == 0) currentTile++;
         }
+
+        console.log(colors);
     }
 
+    const drawTiles = (tiles) => {
+        tiles.map(tile => {
+            ctx.fillStyle = `rgb(${tile[0]},${tile[1]},${tile[2]})`;
+            ctx.fillRect(h, v, rasterSize, rasterSize);
+        })
+    }
     useLayoutEffect(() => {
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext('2d')
 
-        var img = new Image();
-        img.onload = function () {
+        let img = new Image();
+        img.onload = () => {
+            // center image in canvas and resize to fit larger site
             const scalingFactor = Math.max(ctx.canvas.height / img.height, ctx.canvas.width / img.width)
             ctx.drawImage(img, (ctx.canvas.width - img.width * scalingFactor) / 2, (ctx.canvas.height - img.height * scalingFactor) / 2, img.width * scalingFactor, img.height * scalingFactor);
+
+            // save pixel values and size to imageObject
+            setImageObject(ctx.getImageData(0, 0, canvas.width, canvas.height));
         };
         img.src = imagePath;
 
+        // resize canvas on window resize
         window.addEventListener("resize", resizeCanvas(ctx));
-
         return () => window.removeEventListener("resize", resizeCanvas);
-
     }, [imagePath]);
 
     const steps = [
@@ -83,7 +87,7 @@ const Steps = () => {
         },
         {
             name: "Bild rastern",
-            tool: <input type="range" min="1" max="10" value="4" class="w-64" onChange={() => rasterImage()}></input>
+            tool: <input type="range" min="1" max="10" value={tileCount} class="w-64" onChange={changeRasterSize}></input>
         },
         {
             name: "Farben Normalisieren",
@@ -91,7 +95,7 @@ const Steps = () => {
         },
         {
             name: "Komposition spielen",
-            tool: ""
+            tool: <p onClick={() => setPause(!pause)} class="text-4xl cursor-pointer">{pause ? "▶️" : "⏸️"}</p>
         }
     ];
 
@@ -106,7 +110,7 @@ const Steps = () => {
                     {
                         currentStep == 0
                             ? null
-                            : <Button onClick={() => setCurrentStep(currentStep - 1)} text={"⬅️ " + steps[currentStep].name} />
+                            : <Button onClick={() => setCurrentStep(currentStep - 1)} text={"⬅️ " + steps[currentStep - 1].name} />
                     }
                 </div>
                 <div class="basis-1/2 flex justify-center">
@@ -122,7 +126,7 @@ const Steps = () => {
             </div>
         </div>
     );
-};
+}
 
 export default Steps;
 
