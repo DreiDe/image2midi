@@ -1,0 +1,118 @@
+{
+    "header": {
+      "keySignatures": [
+        {
+          "key": "C",
+          "scale": "major",
+          "ticks": 0
+        }
+      ],
+      "meta": [],
+      "name": "Steinway Grand Piano",
+      "ppq": 480,
+      "tempos": [
+        {
+          "bpm": 80,
+          "ticks": 0
+        }
+      ],
+      "timeSignatures": [
+        {
+          "ticks": 0,
+          "timeSignature": [
+            4,
+            4
+          ],
+          "measures": 0
+        }
+      ]
+    },
+    "tracks": [
+      {
+        "channel": 0,
+        "controlChanges": {},
+        "pitchBends": [],
+        "instrument": {
+          "family": "piano",
+          "name": "acoustic grand piano",
+          "number": 0
+        },
+        "name": "Steinway Grand Piano",
+        "notes": [
+          {
+            "duration": 0.37656249999999997,
+            "durationTicks": 241,
+            "midi": 44,
+            "name": "G#2",
+            "ticks": 5,
+            "time": 0.0078125,
+            "velocity": 0.5275590551181102
+          },
+          {
+            "duration": 0.37499999999999994,
+            "durationTicks": 240,
+            "midi": 51,
+            "name": "D#3",
+            "ticks": 246,
+            "time": 0.38437499999999997,
+            "velocity": 0.5905511811023622
+          },
+          {
+            "duration": 0.3749999999999999,
+            "durationTicks": 240,
+            "midi": 56,
+            "name": "G#3",
+            "ticks": 476,
+            "time": 0.74375,
+            "velocity": 0.44881889763779526
+          },
+          {
+            "duration": 0.3671875000000002,
+            "durationTicks": 235,
+            "midi": 63,
+            "name": "D#4",
+            "ticks": 717,
+            "time": 1.1203124999999998,
+            "velocity": 0.5354330708661418
+          },
+          {
+            "duration": 0.37187499999999973,
+            "durationTicks": 238,
+            "midi": 75,
+            "name": "D#5",
+            "ticks": 962,
+            "time": 1.5031250000000003,
+            "velocity": 0.5590551181102362
+          },
+          {
+            "duration": 0.3640625000000002,
+            "durationTicks": 233,
+            "midi": 68,
+            "name": "G#4",
+            "ticks": 1200,
+            "time": 1.875,
+            "velocity": 0.49606299212598426
+          },
+          {
+            "duration": 0.375,
+            "durationTicks": 240,
+            "midi": 80,
+            "name": "G#5",
+            "ticks": 1439,
+            "time": 2.2484375,
+            "velocity": 0.5748031496062992
+          },
+          {
+            "duration": 0.3687499999999999,
+            "durationTicks": 236,
+            "midi": 75,
+            "name": "D#5",
+            "ticks": 1676,
+            "time": 2.61875,
+            "velocity": 0.5748031496062992
+          }
+        ],
+        "endOfTrackTicks": 21120
+      }
+    ]
+  }
