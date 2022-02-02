@@ -2,9 +2,10 @@ import { useState, useEffect, useLayoutEffect } from 'preact/hooks';
 
 import Button from './Button';
 import Notch from './Notch';
+import Palette from './Palette';
 
 const Steps = () => {
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(2);
     const [imagePath, setImagePath] = useState();
     const [locked, setLocked] = useState(true);
 
@@ -21,6 +22,37 @@ const Steps = () => {
         ctx.font = "40px Comic Sans MS";
         ctx.textAlign = "center";
         ctx.fillText("Noch kein 🖼️ gewählt", canvas.width / 2, canvas.height / 2);
+    }
+
+    const rasterImage = () => {
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext('2d')
+        const rasterSize = canvas.width / 4;
+
+        console.log(rasterSize);
+        console.log(canvas.width);
+
+        for (let h = 0; h < canvas.width; h += rasterSize) {
+            for (let v = 0; v < canvas.height; v += rasterSize) {
+                let color = { r: 0, g: 0, b: 0 };
+                for (let x = h; x < h + rasterSize; x++) {
+                    for (let y = v; y < v + rasterSize; y++) {
+                        let pixel = ctx.getImageData(x, y, 1, 1);
+                        let data = pixel.data;
+                        color.r += data[0];
+                        color.g += data[1];
+                        color.b += data[2];
+                    }
+                }
+
+                color.r /= rasterSize * rasterSize;
+                color.g /= rasterSize * rasterSize;
+                color.b /= rasterSize * rasterSize;
+
+                ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+                ctx.fillRect(h, v, rasterSize, rasterSize);
+            }
+        }
     }
 
     useLayoutEffect(() => {
@@ -51,11 +83,11 @@ const Steps = () => {
         },
         {
             name: "Bild rastern",
-            tool: <input type="range" min="1" max="10" value="4" class="w-64"></input>
+            tool: <input type="range" min="1" max="10" value="4" class="w-64" onChange={() => rasterImage()}></input>
         },
         {
             name: "Farben Normalisieren",
-            tool: ""
+            tool: <Palette></Palette>
         },
         {
             name: "Komposition spielen",
