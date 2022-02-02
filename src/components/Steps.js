@@ -3,14 +3,14 @@ import { useState, useEffect, useLayoutEffect } from 'preact/hooks';
 import Button from './Button';
 import Notch from './Notch';
 import Palette from './Palette';
+import { pixelize } from "../pixel"
 
 const Steps = () => {
     const [currentStep, setCurrentStep] = useState(2);
     const [imagePath, setImagePath] = useState();
     const [locked, setLocked] = useState(true);
-    const [tileCount, setTileCount] = useState(4);
     const [pause, setPause] = useState(true);
-    const [imageObject, setImageObject] = useState();
+    const [image, setImage] = useState();
 
     const imageChange = (e) => {
         const [file] = e.target.files;
@@ -27,47 +27,14 @@ const Steps = () => {
         ctx.fillText("Noch kein 🖼️ gewählt", canvas.width / 2, canvas.height / 2);
     }
 
-    const changeRasterSize = e => {
-        setTileCount(e.target.value);
-
-        const tilesPerRow = e.target.value;
-        const aspectRatio = imageObject.height / imageObject.width;
-        const totalTiles = tilesPerRow * Math.round(tilesPerRow * aspectRatio);
-        const pxPerTile = Math.round(imageObject.width / tilesPerRow);
-        const data = imageObject.data;
-
-        let currentTile = 0;
-        let colors = [...Array(totalTiles)].map(e => Array(3).fill(0));
-
-        for (let px = 0; px < data.length / 4; px++) {
-            let rgba = px * 4;
-            colors[currentTile][0] += data[rgba];
-            colors[currentTile][1] += data[rgba + 1];
-            colors[currentTile][2] += data[rgba + 2];
-            if (px % pxPerTile == 0) currentTile++;
-        }
-
-        console.log(colors);
-    }
-
-    const drawTiles = (tiles) => {
-        tiles.map(tile => {
-            ctx.fillStyle = `rgb(${tile[0]},${tile[1]},${tile[2]})`;
-            ctx.fillRect(h, v, rasterSize, rasterSize);
-        })
-    }
     useLayoutEffect(() => {
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext('2d')
 
         let img = new Image();
         img.onload = () => {
-            // center image in canvas and resize to fit larger site
-            const scalingFactor = Math.max(ctx.canvas.height / img.height, ctx.canvas.width / img.width)
-            ctx.drawImage(img, (ctx.canvas.width - img.width * scalingFactor) / 2, (ctx.canvas.height - img.height * scalingFactor) / 2, img.width * scalingFactor, img.height * scalingFactor);
-
-            // save pixel values and size to imageObject
-            setImageObject(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            pixelize(canvas, img, 10000);
+            setImage(img);
         };
         img.src = imagePath;
 
@@ -75,6 +42,11 @@ const Steps = () => {
         window.addEventListener("resize", resizeCanvas(ctx));
         return () => window.removeEventListener("resize", resizeCanvas);
     }, [imagePath]);
+
+    const changeTiles = e => {
+        const tiles = e.target.value;
+        pixelize(document.getElementById("canvas"), image, tiles);
+    }
 
     const steps = [
         {
@@ -87,7 +59,7 @@ const Steps = () => {
         },
         {
             name: "Bild rastern",
-            tool: <input type="range" min="1" max="10" value={tileCount} class="w-64" onChange={changeRasterSize}></input>
+            tool: <input type="range" min="1" max="10" class="w-64" onChange={changeTiles}></input>
         },
         {
             name: "Farben Normalisieren",
