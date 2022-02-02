@@ -16,7 +16,7 @@ const palette = [
     [220, 38, 38]
 ];
 
-const pixelize = (canvas, img, tiles) => {
+const pixelize = (canvas, img, tiles, usePalette = false) => {
     let scale = tiles > canvas.width ? 1 : tiles / canvas.width;
 
     var scaledW = Math.ceil(canvas.width * scale);
@@ -35,9 +35,26 @@ const pixelize = (canvas, img, tiles) => {
     const width = scalingFactor < 1 ? img.width * scalingFactor : img.width;
 
 
-    // first draw the image as miniature in the canvas, then cut out the miniature from the canvas and scale it up again
+    // first draw the center image cutout as miniature in the canvas, then cut out the miniature from the canvas and scale it up again
     // cut out before scale down to avoid half pixels at left side
     ctx.drawImage(img, (img.width - width) / 2, (img.height - height) / 2, width, height, 0, 0, scaledW, scaledH);
+
+    if (usePalette) {
+        for (var y = 0; y < scaledH; y++) {
+            for (var x = 0; x < scaledW; x++) {
+                let pixel = ctx.getImageData(x, y, 1, 1);
+                const finalcolor = similarColor([
+                    pixel.data[0],
+                    pixel.data[1],
+                    pixel.data[2],
+                ]);
+                pixel.data[0] = finalcolor[0];
+                pixel.data[1] = finalcolor[1];
+                pixel.data[2] = finalcolor[2];
+                ctx.putImageData(pixel, x, y);
+            }
+        }
+    }
     ctx.drawImage(canvas, 0, 0, scaledW, scaledH, 0, 0, canvas.width, canvas.height);
 };
 
@@ -68,7 +85,7 @@ const similarColor = actualColor => {
     let selectedColor = [];
     let currentSim = colorSim(actualColor, palette[0]);
     let nextColor;
-    this.palette.forEach((color) => {
+    palette.forEach((color) => {
         nextColor = colorSim(actualColor, color);
         if (nextColor <= currentSim) {
             selectedColor = color;

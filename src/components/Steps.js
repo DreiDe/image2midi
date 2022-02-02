@@ -6,11 +6,12 @@ import Palette from './Palette';
 import { pixelize } from "../pixel"
 
 const Steps = () => {
-    const [currentStep, setCurrentStep] = useState(2);
+    const [currentStep, setCurrentStep] = useState(0);
     const [imagePath, setImagePath] = useState();
     const [locked, setLocked] = useState(true);
     const [pause, setPause] = useState(true);
     const [image, setImage] = useState();
+    const [tileCount, setTileCount] = useState();
 
     const imageChange = (e) => {
         const [file] = e.target.files;
@@ -25,6 +26,11 @@ const Steps = () => {
         ctx.font = "40px Comic Sans MS";
         ctx.textAlign = "center";
         ctx.fillText("Noch kein 🖼️ gewählt", canvas.width / 2, canvas.height / 2);
+    }
+
+    const changeTiles = tileCount => {
+        setTileCount(tileCount);
+        pixelize(document.getElementById("canvas"), image, tileCount);
     }
 
     useLayoutEffect(() => {
@@ -43,10 +49,13 @@ const Steps = () => {
         return () => window.removeEventListener("resize", resizeCanvas);
     }, [imagePath]);
 
-    const changeTiles = e => {
-        const tiles = e.target.value;
-        pixelize(document.getElementById("canvas"), image, tiles);
-    }
+    useEffect(() => {
+        if (!image) return;
+
+        if (currentStep == 0) changeTiles(10000);
+        else if (currentStep == 1) changeTiles(tileCount);
+        else if (currentStep == 2) pixelize(document.getElementById("canvas"), image, tileCount, true);
+    }, [currentStep]);
 
     const steps = [
         {
@@ -59,7 +68,7 @@ const Steps = () => {
         },
         {
             name: "Bild rastern",
-            tool: <input type="range" min="1" max="10" class="w-64" onChange={changeTiles}></input>
+            tool: <input type="range" min="1" max="10" class="w-64" value={tileCount} onChange={e => changeTiles(e.target.value)}></input>
         },
         {
             name: "Farben Normalisieren",
