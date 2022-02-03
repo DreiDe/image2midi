@@ -33,6 +33,7 @@ const pixelize = (canvas, img, tiles, usePalette = false) => {
     const scalingFactor = canvasRatio / imageRatio;
     const height = scalingFactor > 1 ? img.height * scalingFactor : img.height;
     const width = scalingFactor < 1 ? img.width * scalingFactor : img.width;
+    const order = [];
 
 
     // first draw the center image cutout as miniature in the canvas, then cut out the miniature from the canvas and scale it up again
@@ -43,19 +44,22 @@ const pixelize = (canvas, img, tiles, usePalette = false) => {
         for (var y = 0; y < scaledH; y++) {
             for (var x = 0; x < scaledW; x++) {
                 let pixel = ctx.getImageData(x, y, 1, 1);
-                const finalcolor = similarColor([
+                const matched = similarColor([
                     pixel.data[0],
                     pixel.data[1],
                     pixel.data[2],
                 ]);
-                pixel.data[0] = finalcolor[0];
-                pixel.data[1] = finalcolor[1];
-                pixel.data[2] = finalcolor[2];
+                pixel.data[0] = palette[matched][0];
+                pixel.data[1] = palette[matched][1];
+                pixel.data[2] = palette[matched][2];
+                order.push(matched);
                 ctx.putImageData(pixel, x, y);
             }
         }
     }
+
     ctx.drawImage(canvas, 0, 0, scaledW, scaledH, 0, 0, canvas.width, canvas.height);
+    return order;
 };
 
 /**
@@ -78,21 +82,21 @@ const colorSim = (rgbColor, compareColor) => {
 /**
  * given actualColor, check from the paletteColors the most aproximated color
  * @param {array} actualColor rgb color to compare [int,int,int]
- * @returns {array} aproximated rgb color
+ * @returns {int} aproximated rgb color
  */
 
 const similarColor = actualColor => {
-    let selectedColor = [];
+    let matchedColor = 0;
     let currentSim = colorSim(actualColor, palette[0]);
     let nextColor;
-    palette.forEach((color) => {
+    palette.forEach((color, i) => {
         nextColor = colorSim(actualColor, color);
         if (nextColor <= currentSim) {
-            selectedColor = color;
+            matchedColor = i;
             currentSim = nextColor;
         }
     });
-    return selectedColor;
+    return matchedColor;
 }
 
-export { pixelize, similarColor }
+export { pixelize }

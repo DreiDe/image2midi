@@ -4,14 +4,16 @@ import Button from './Button';
 import Notch from './Notch';
 import Palette from './Palette';
 import { pixelize } from "../pixel"
+import { playSong, stop } from '../synth';
 
 const Steps = () => {
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(3);
     const [imagePath, setImagePath] = useState();
     const [locked, setLocked] = useState(true);
     const [pause, setPause] = useState(true);
     const [image, setImage] = useState();
     const [tileCount, setTileCount] = useState();
+    const [order, setOrder] = useState();
 
     const imageChange = (e) => {
         const [file] = e.target.files;
@@ -28,9 +30,9 @@ const Steps = () => {
         ctx.fillText("Noch kein 🖼️ gewählt", canvas.width / 2, canvas.height / 2);
     }
 
-    const changeTiles = tileCount => {
+    const changeTiles = (tileCount, match = false) => {
         setTileCount(tileCount);
-        pixelize(document.getElementById("canvas"), image, tileCount);
+        setOrder(pixelize(document.getElementById("canvas"), image, tileCount, match));
     }
 
     useLayoutEffect(() => {
@@ -54,8 +56,18 @@ const Steps = () => {
 
         if (currentStep == 0) changeTiles(10000);
         else if (currentStep == 1) changeTiles(tileCount);
-        else if (currentStep == 2) pixelize(document.getElementById("canvas"), image, tileCount, true);
+        else if (currentStep == 2) changeTiles(tileCount, true);
     }, [currentStep]);
+
+    const play = () => {
+        if (pause) {
+            playSong(order);
+        }
+        else{
+            stop();
+        }
+        setPause(!pause);
+    }
 
     const steps = [
         {
@@ -76,12 +88,12 @@ const Steps = () => {
         },
         {
             name: "Komposition spielen",
-            tool: <p onClick={() => setPause(!pause)} class="text-4xl cursor-pointer">{pause ? "▶️" : "⏸️"}</p>
+            tool: <p onClick={play} class="text-4xl cursor-pointer">{pause ? "▶️" : "⏹️"}</p>
         }
     ];
 
     return (
-        <div class="flex flex-col h-full w-3/4 md:w-1/2 justify-between">
+        <div class="flex flex-col h-full w-full lg:w-1/2 justify-between">
             <Notch text={steps[currentStep].name} />
 
             <canvas class="h-full my-2 mx-auto aspect-[2/3] rounded-md max-w-full bg-white" id="canvas" />

@@ -1,6 +1,5 @@
 import './style'
 import Steps from './components/Steps'
-import ToneJS from './components/ToneJS';
 
 export default function App() {
 	return (
