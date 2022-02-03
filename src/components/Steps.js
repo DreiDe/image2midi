@@ -7,7 +7,7 @@ import { pixelize } from "../pixel"
 import { playSong } from '../synth';
 
 const Steps = () => {
-    const [currentStep, setCurrentStep] = useState(3);
+    const [currentStep, setCurrentStep] = useState(0);
     const [imagePath, setImagePath] = useState();
     const [locked, setLocked] = useState(true);
     const [pause, setPause] = useState(true);
