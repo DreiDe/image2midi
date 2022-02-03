@@ -5,7 +5,7 @@ let crunker = new Crunker();
 const playSong = (order, cb) => {
     const files = [];
     order.map(tile => {
-        files.push(`assets/mp3/${tile}.mp3`)
+        files.push(`assets/wav/${tile}.wav`)
     })
     crunker
         .fetchAudio(...files)
@@ -13,7 +13,7 @@ const playSong = (order, cb) => {
             return crunker.concatAudio(buffers);
         })
         .then((concated) => {
-            return crunker.export(concated, 'audio/mp3');
+            return crunker.export(concated, 'audio/wav');
         })
         .then((output) => {
             cb(output.url);
