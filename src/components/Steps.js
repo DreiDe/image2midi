@@ -4,7 +4,7 @@ import Button from './Button';
 import Notch from './Notch';
 import Palette from './Palette';
 import { pixelize } from "../pixel"
-import { playSong, stop } from '../synth';
+import { playSong } from '../synth';
 
 const Steps = () => {
     const [currentStep, setCurrentStep] = useState(3);
@@ -14,6 +14,7 @@ const Steps = () => {
     const [image, setImage] = useState();
     const [tileCount, setTileCount] = useState();
     const [order, setOrder] = useState();
+    const [audioBlob, setAudioBlob] = useState();
 
     const imageChange = (e) => {
         const [file] = e.target.files;
@@ -57,17 +58,8 @@ const Steps = () => {
         if (currentStep == 0) changeTiles(10000);
         else if (currentStep == 1) changeTiles(tileCount);
         else if (currentStep == 2) changeTiles(tileCount, true);
+        else playSong(order, setAudioBlob);
     }, [currentStep]);
-
-    const play = () => {
-        if (pause) {
-            playSong(order);
-        }
-        else{
-            stop();
-        }
-        setPause(!pause);
-    }
 
     const steps = [
         {
@@ -88,7 +80,9 @@ const Steps = () => {
         },
         {
             name: "Komposition spielen",
-            tool: <p onClick={play} class="text-4xl cursor-pointer">{pause ? "▶️" : "⏹️"}</p>
+            tool:
+                <audio class="w-full mx-3" controls autoplay src={audioBlob}>
+                </audio>
         }
     ];
 
@@ -106,16 +100,19 @@ const Steps = () => {
                             : <Button onClick={() => setCurrentStep(currentStep - 1)} text={"⬅️ " + steps[currentStep - 1].name} />
                     }
                 </div>
-                <div class="basis-1/2 flex justify-center">
-                    {steps[currentStep].tool}
-                </div>
-                <div class="basis-1/4 flex justify-end">
-                    {
-                        currentStep == steps.length - 1
-                            ? null
-                            : <Button onClick={() => setCurrentStep(currentStep + 1)} text={steps[currentStep + 1].name + " ➡️"} disabled={locked} />
-                    }
-                </div>
+                {
+                    currentStep == 3
+                        ? <div class="basis-3/4 flex justify-center">
+                            {steps[currentStep].tool}
+                        </div>
+                        : <>
+                            <div class="basis-1/2 flex justify-center">
+                                {steps[currentStep].tool}
+                            </div>
+                            <div class="basis-1/4 flex justify-end">
+                                <Button onClick={() => setCurrentStep(currentStep + 1)} text={steps[currentStep + 1].name + " ➡️"} disabled={locked} />
+                            </div></>
+                }
             </div>
         </div>
     );
